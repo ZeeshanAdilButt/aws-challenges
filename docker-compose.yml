@@ -1,0 +1,49 @@
+# One compose file for the whole repository. Every image is pinned to a version tag.
+# The emulator is the only service most challenges need:  docker compose up -d moto
+name: aws-challenges
+
+networks:
+  default:
+    name: aws-challenges   # fixed name, so the OpenTofu wrapper can join it and reach the emulator as "moto"
+
+services:
+  moto:
+    image: motoserver/moto:5.2.4
+    ports:
+      - "127.0.0.1:5000:5000"   # bound to this computer only, never to the network
+    networks:
+      default:
+        # The AWS provider reaches S3 Control at "<account id>.<endpoint host>", so the OpenTofu container
+        # must also find the emulator as 123456789012.moto (the emulator's account id).
+        aliases: ["123456789012.moto"]
+    restart: "no"
+
+  # Challenge 11. Started with: docker compose --profile restore up -d postgres
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["restore"]
+    container_name: awr-postgres
+    environment:
+      POSTGRES_PASSWORD: daftar-local-only
+    # WAL archiving: every finished WAL file is copied to /archive (a volume). archive_timeout makes a file at least every 5 seconds.
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_timeout=5
+      - -c
+      - archive_command=test ! -f /archive/%f && cp %p /archive/%f
+    volumes:
+      - archive:/archive
+    ports:
+      - "127.0.0.1:15433:5432"
+
+volumes:
+  archive:
+    name: awr-archive
+
+  # There is no DynamoDB Local service on purpose. Challenge 12 uses moto, which already covers the calls it needs.
+  # That saves downloading one more image and keeps one emulator for the whole course.

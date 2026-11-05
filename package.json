@@ -1,0 +1,49 @@
+{
+  "name": "aws-challenges",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hands-on challenges for the AWS in Practice course by Zeeshan Adil. Everything runs on an emulator or a pure model. Cost: 0 dollars.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "guard": "node toolkit/with-env.mjs toolkit/guard.js",
+    "moto:up": "docker compose up -d moto && node tools/wait-for-moto.mjs",
+    "moto:down": "docker compose down",
+    "test": "node toolkit/with-env.mjs --test --test-concurrency=1 \"toolkit/**/*.test.mjs\" \"challenges/**/*.test.mjs\"",
+    "test:toolkit": "node toolkit/with-env.mjs --test --test-concurrency=1 \"toolkit/**/*.test.mjs\"",
+    "test:0": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-0-*/**/*.test.mjs\"",
+    "test:1": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-1-*/**/*.test.mjs\"",
+    "test:2": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-2-*/**/*.test.mjs\"",
+    "test:3": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-3-*/**/*.test.mjs\"",
+    "test:4": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-4-*/**/*.test.mjs\"",
+    "test:5": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-5-*/**/*.test.mjs\"",
+    "test:6": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-6-*/**/*.test.mjs\"",
+    "test:7": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-7-*/**/*.test.mjs\"",
+    "test:8": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-8-*/**/*.test.mjs\"",
+    "test:9": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-9-*/**/*.test.mjs\"",
+    "test:10": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-10-*/**/*.test.mjs\"",
+    "test:11": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-11-*/**/*.test.mjs\"",
+    "test:12": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-12-*/**/*.test.mjs\"",
+    "test:13": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-13-*/**/*.test.mjs\"",
+    "test:14": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-14-*/**/*.test.mjs\"",
+    "test:15": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-15-*/**/*.test.mjs\"",
+    "test:16": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/**/*.test.mjs\"",
+    "test:16:1": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-1-*/*.test.mjs\"",
+    "test:16:2": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-2-*/*.test.mjs\"",
+    "test:16:3": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-3-*/*.test.mjs\"",
+    "test:16:4": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-4-*/*.test.mjs\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1162.0",
+    "@aws-sdk/client-ec2": "3.1162.0",
+    "@aws-sdk/client-ecs": "3.1162.0",
+    "@aws-sdk/client-iam": "3.1162.0",
+    "@aws-sdk/client-s3": "3.1162.0",
+    "@aws-sdk/client-sqs": "3.1162.0",
+    "@aws-sdk/client-sts": "3.1162.0",
+    "@aws-sdk/s3-request-presigner": "3.1162.0",
+    "pg": "8.13.1"
+  }
+}

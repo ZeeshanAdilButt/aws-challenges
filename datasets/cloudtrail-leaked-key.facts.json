@@ -1,0 +1,27 @@
+{
+  "leakedKey": "AKIADAFTARLEAK000001",
+  "owner": "ci-deploy",
+  "trustedIps": [
+    "198.51.100.10"
+  ],
+  "totalEventsInLog": 886,
+  "eventsWithTheKey": 336,
+  "suspect": {
+    "calls": 156,
+    "failed": 16,
+    "firstSeen": "2026-10-19T02:14:07.000Z",
+    "lastSeen": "2026-10-19T05:34:54.000Z",
+    "sourceIps": [
+      "192.0.2.77"
+    ],
+    "regions": [
+      "ap-southeast-1",
+      "us-east-1"
+    ],
+    "objectsRead": 120,
+    "instancesLaunched": 4,
+    "writes": [
+      "RunInstances"
+    ]
+  }
+}

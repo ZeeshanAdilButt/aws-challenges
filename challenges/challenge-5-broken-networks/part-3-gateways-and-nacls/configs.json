@@ -1,0 +1,507 @@
+{
+  "set": "part-3-gateways-and-nacls",
+  "configs": [
+    {
+      "id": "nat-in-private-subnet",
+      "story": "The NAT gateway exists and the route to it is right, but the app still has no internet.",
+      "probe": {
+        "from": "app",
+        "to": "internet:203.0.113.20",
+        "port": 443
+      },
+      "expect": {
+        "code": "nat-not-public",
+        "where": "app-a"
+      },
+      "network": {
+        "name": "daftar",
+        "cidr": "10.20.0.0/16",
+        "internetGateway": true,
+        "natGateways": {
+          "nat-a": {
+            "subnet": "app-a"
+          }
+        },
+        "subnets": {
+          "app-a": {
+            "cidr": "10.20.0.0/22",
+            "routeTable": "rt-app"
+          },
+          "app-b": {
+            "cidr": "10.20.4.0/22",
+            "routeTable": "rt-app"
+          },
+          "public-a": {
+            "cidr": "10.20.8.0/24",
+            "routeTable": "rt-public"
+          },
+          "public-b": {
+            "cidr": "10.20.9.0/24",
+            "routeTable": "rt-public"
+          },
+          "data-a": {
+            "cidr": "10.20.10.0/26",
+            "routeTable": "rt-data"
+          },
+          "data-b": {
+            "cidr": "10.20.10.64/26",
+            "routeTable": "rt-data"
+          }
+        },
+        "routeTables": {
+          "rt-public": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            },
+            {
+              "destination": "0.0.0.0/0",
+              "target": "igw"
+            }
+          ],
+          "rt-app": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            },
+            {
+              "destination": "0.0.0.0/0",
+              "target": "nat:nat-a"
+            }
+          ],
+          "rt-data": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            }
+          ]
+        },
+        "securityGroups": {
+          "sg-alb": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "peer": "0.0.0.0/0"
+              }
+            ],
+            "egress": [
+              {
+                "protocol": "tcp",
+                "from": 8080,
+                "to": 8080,
+                "peer": "sg-app"
+              }
+            ]
+          },
+          "sg-app": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 8080,
+                "to": 8080,
+                "peer": "sg-alb"
+              }
+            ],
+            "egress": [
+              {
+                "protocol": "tcp",
+                "from": 5432,
+                "to": 5432,
+                "peer": "sg-db"
+              },
+              {
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "peer": "0.0.0.0/0"
+              }
+            ]
+          },
+          "sg-db": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 5432,
+                "to": 5432,
+                "peer": "sg-app"
+              }
+            ],
+            "egress": []
+          }
+        },
+        "nacls": {},
+        "instances": {
+          "alb": {
+            "subnet": "public-a",
+            "ip": "10.20.8.10",
+            "publicIp": "54.0.2.10",
+            "securityGroups": [
+              "sg-alb"
+            ]
+          },
+          "app": {
+            "subnet": "app-a",
+            "ip": "10.20.0.10",
+            "securityGroups": [
+              "sg-app"
+            ]
+          },
+          "db": {
+            "subnet": "data-a",
+            "ip": "10.20.10.10",
+            "securityGroups": [
+              "sg-db"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "no-public-address",
+      "story": "The load balancer was recreated. Its security group and routes are right, but nobody outside can reach it.",
+      "probe": {
+        "from": "internet:198.51.100.7",
+        "to": "alb",
+        "port": 443
+      },
+      "expect": {
+        "code": "no-public-ip",
+        "where": "alb"
+      },
+      "network": {
+        "name": "daftar",
+        "cidr": "10.20.0.0/16",
+        "internetGateway": true,
+        "natGateways": {
+          "nat-a": {
+            "subnet": "public-a"
+          }
+        },
+        "subnets": {
+          "app-a": {
+            "cidr": "10.20.0.0/22",
+            "routeTable": "rt-app"
+          },
+          "app-b": {
+            "cidr": "10.20.4.0/22",
+            "routeTable": "rt-app"
+          },
+          "public-a": {
+            "cidr": "10.20.8.0/24",
+            "routeTable": "rt-public"
+          },
+          "public-b": {
+            "cidr": "10.20.9.0/24",
+            "routeTable": "rt-public"
+          },
+          "data-a": {
+            "cidr": "10.20.10.0/26",
+            "routeTable": "rt-data"
+          },
+          "data-b": {
+            "cidr": "10.20.10.64/26",
+            "routeTable": "rt-data"
+          }
+        },
+        "routeTables": {
+          "rt-public": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            },
+            {
+              "destination": "0.0.0.0/0",
+              "target": "igw"
+            }
+          ],
+          "rt-app": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            },
+            {
+              "destination": "0.0.0.0/0",
+              "target": "nat:nat-a"
+            }
+          ],
+          "rt-data": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            }
+          ]
+        },
+        "securityGroups": {
+          "sg-alb": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "peer": "0.0.0.0/0"
+              }
+            ],
+            "egress": [
+              {
+                "protocol": "tcp",
+                "from": 8080,
+                "to": 8080,
+                "peer": "sg-app"
+              }
+            ]
+          },
+          "sg-app": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 8080,
+                "to": 8080,
+                "peer": "sg-alb"
+              }
+            ],
+            "egress": [
+              {
+                "protocol": "tcp",
+                "from": 5432,
+                "to": 5432,
+                "peer": "sg-db"
+              },
+              {
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "peer": "0.0.0.0/0"
+              }
+            ]
+          },
+          "sg-db": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 5432,
+                "to": 5432,
+                "peer": "sg-app"
+              }
+            ],
+            "egress": []
+          }
+        },
+        "nacls": {},
+        "instances": {
+          "alb": {
+            "subnet": "public-a",
+            "ip": "10.20.8.10",
+            "securityGroups": [
+              "sg-alb"
+            ]
+          },
+          "app": {
+            "subnet": "app-a",
+            "ip": "10.20.0.10",
+            "securityGroups": [
+              "sg-app"
+            ]
+          },
+          "db": {
+            "subnet": "data-a",
+            "ip": "10.20.10.10",
+            "securityGroups": [
+              "sg-db"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "nacl-no-reply",
+      "story": "A network ACL was added to the public subnet \"for safety\". Requests arrive, but customers never get an answer.",
+      "probe": {
+        "from": "internet:198.51.100.7",
+        "to": "alb",
+        "port": 443
+      },
+      "expect": {
+        "code": "nacl-return-denied",
+        "where": "nacl-public"
+      },
+      "network": {
+        "name": "daftar",
+        "cidr": "10.20.0.0/16",
+        "internetGateway": true,
+        "natGateways": {
+          "nat-a": {
+            "subnet": "public-a"
+          }
+        },
+        "subnets": {
+          "app-a": {
+            "cidr": "10.20.0.0/22",
+            "routeTable": "rt-app"
+          },
+          "app-b": {
+            "cidr": "10.20.4.0/22",
+            "routeTable": "rt-app"
+          },
+          "public-a": {
+            "cidr": "10.20.8.0/24",
+            "routeTable": "rt-public",
+            "nacl": "nacl-public"
+          },
+          "public-b": {
+            "cidr": "10.20.9.0/24",
+            "routeTable": "rt-public"
+          },
+          "data-a": {
+            "cidr": "10.20.10.0/26",
+            "routeTable": "rt-data"
+          },
+          "data-b": {
+            "cidr": "10.20.10.64/26",
+            "routeTable": "rt-data"
+          }
+        },
+        "routeTables": {
+          "rt-public": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            },
+            {
+              "destination": "0.0.0.0/0",
+              "target": "igw"
+            }
+          ],
+          "rt-app": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            },
+            {
+              "destination": "0.0.0.0/0",
+              "target": "nat:nat-a"
+            }
+          ],
+          "rt-data": [
+            {
+              "destination": "10.20.0.0/16",
+              "target": "local"
+            }
+          ]
+        },
+        "securityGroups": {
+          "sg-alb": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "peer": "0.0.0.0/0"
+              }
+            ],
+            "egress": [
+              {
+                "protocol": "tcp",
+                "from": 8080,
+                "to": 8080,
+                "peer": "sg-app"
+              }
+            ]
+          },
+          "sg-app": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 8080,
+                "to": 8080,
+                "peer": "sg-alb"
+              }
+            ],
+            "egress": [
+              {
+                "protocol": "tcp",
+                "from": 5432,
+                "to": 5432,
+                "peer": "sg-db"
+              },
+              {
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "peer": "0.0.0.0/0"
+              }
+            ]
+          },
+          "sg-db": {
+            "ingress": [
+              {
+                "protocol": "tcp",
+                "from": 5432,
+                "to": 5432,
+                "peer": "sg-app"
+              }
+            ],
+            "egress": []
+          }
+        },
+        "nacls": {
+          "nacl-public": {
+            "inbound": [
+              {
+                "rule": 100,
+                "action": "allow",
+                "protocol": "tcp",
+                "from": 443,
+                "to": 443,
+                "cidr": "0.0.0.0/0"
+              },
+              {
+                "rule": 110,
+                "action": "allow",
+                "protocol": "tcp",
+                "from": 1024,
+                "to": 65535,
+                "cidr": "0.0.0.0/0"
+              }
+            ],
+            "outbound": [
+              {
+                "rule": 100,
+                "action": "allow",
+                "protocol": "tcp",
+                "from": 80,
+                "to": 80,
+                "cidr": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "instances": {
+          "alb": {
+            "subnet": "public-a",
+            "ip": "10.20.8.10",
+            "publicIp": "54.0.2.10",
+            "securityGroups": [
+              "sg-alb"
+            ]
+          },
+          "app": {
+            "subnet": "app-a",
+            "ip": "10.20.0.10",
+            "securityGroups": [
+              "sg-app"
+            ]
+          },
+          "db": {
+            "subnet": "data-a",
+            "ip": "10.20.10.10",
+            "securityGroups": [
+              "sg-db"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

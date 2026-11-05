@@ -1,0 +1,44 @@
+{
+  "policies": [
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        { "Sid": "ReadWriteNotes", "Effect": "Allow", "Action": ["s3:GetObject", "s3:PutObject"], "Resource": "arn:aws:s3:::daftar-notes/notes/*" },
+        { "Sid": "ListNotes", "Effect": "Allow", "Action": "s3:ListBucket", "Resource": "arn:aws:s3:::daftar-notes", "Condition": { "StringLike": { "s3:prefix": "notes/*" } } },
+        { "Sid": "SendJobs", "Effect": "Allow", "Action": "sqs:SendMessage", "Resource": "arn:aws:sqs:us-east-1:123456789012:daftar-jobs" },
+        { "Sid": "SessionsFromVpc", "Effect": "Allow", "Action": "dynamodb:GetItem", "Resource": "arn:aws:dynamodb:us-east-1:123456789012:table/daftar-sessions", "Condition": { "IpAddress": { "aws:SourceIp": "10.20.0.0/16" } } },
+        { "Sid": "Logs", "Effect": "Allow", "Action": ["logs:CreateLogStream", "logs:PutLogEvents"], "Resource": "arn:aws:logs:us-east-1:123456789012:log-group:/daftar/*" },
+        { "Sid": "DebugLooking", "Effect": "Allow", "Action": "ec2:DescribeInstances", "Resource": "*" }
+      ]
+    },
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        { "Sid": "NoPlainHttp", "Effect": "Deny", "Action": "s3:*", "Resource": "*", "Condition": { "Bool": { "aws:SecureTransport": "false" } } },
+        { "Sid": "NeverDelete", "Effect": "Deny", "Action": ["s3:DeleteObject", "s3:DeleteBucket"], "Resource": "*" }
+      ]
+    }
+  ],
+  "boundary": {
+    "Version": "2012-10-17",
+    "Statement": [{ "Effect": "Allow", "Action": ["s3:*", "sqs:*", "dynamodb:*", "logs:*"], "Resource": "*" }]
+  },
+  "cases": [
+    { "name": "read a note", "action": "s3:GetObject", "resource": "arn:aws:s3:::daftar-notes/notes/42", "context": { "aws:SecureTransport": "true" }, "decision": "Allow", "reason": "allowed" },
+    { "name": "write a note", "action": "s3:PutObject", "resource": "arn:aws:s3:::daftar-notes/notes/42", "context": { "aws:SecureTransport": "true" }, "decision": "Allow", "reason": "allowed" },
+    { "name": "action names ignore capital letters", "action": "s3:getobject", "resource": "arn:aws:s3:::daftar-notes/notes/42", "context": { "aws:SecureTransport": "true" }, "decision": "Allow", "reason": "allowed" },
+    { "name": "read from a folder nobody granted", "action": "s3:GetObject", "resource": "arn:aws:s3:::daftar-notes/exports/report.csv", "context": { "aws:SecureTransport": "true" }, "decision": "Deny", "reason": "no-allow" },
+    { "name": "delete a note: a Deny rule matches", "action": "s3:DeleteObject", "resource": "arn:aws:s3:::daftar-notes/notes/42", "context": { "aws:SecureTransport": "true" }, "decision": "Deny", "reason": "explicit-deny" },
+    { "name": "read a note over plain http: explicit deny wins over allow", "action": "s3:GetObject", "resource": "arn:aws:s3:::daftar-notes/notes/42", "context": { "aws:SecureTransport": "false" }, "decision": "Deny", "reason": "explicit-deny" },
+    { "name": "list the notes folder", "action": "s3:ListBucket", "resource": "arn:aws:s3:::daftar-notes", "context": { "s3:prefix": "notes/2026", "aws:SecureTransport": "true" }, "decision": "Allow", "reason": "allowed" },
+    { "name": "list another folder", "action": "s3:ListBucket", "resource": "arn:aws:s3:::daftar-notes", "context": { "s3:prefix": "exports/", "aws:SecureTransport": "true" }, "decision": "Deny", "reason": "no-allow" },
+    { "name": "list with no prefix at all: the key is missing, the condition fails", "action": "s3:ListBucket", "resource": "arn:aws:s3:::daftar-notes", "context": { "aws:SecureTransport": "true" }, "decision": "Deny", "reason": "no-allow" },
+    { "name": "send a job", "action": "sqs:SendMessage", "resource": "arn:aws:sqs:us-east-1:123456789012:daftar-jobs", "context": {}, "decision": "Allow", "reason": "allowed" },
+    { "name": "send to a queue nobody granted", "action": "sqs:SendMessage", "resource": "arn:aws:sqs:us-east-1:123456789012:daftar-billing", "context": {}, "decision": "Deny", "reason": "no-allow" },
+    { "name": "read a session from inside the VPC", "action": "dynamodb:GetItem", "resource": "arn:aws:dynamodb:us-east-1:123456789012:table/daftar-sessions", "context": { "aws:SourceIp": "10.20.4.9" }, "decision": "Allow", "reason": "allowed" },
+    { "name": "read a session from an office address", "action": "dynamodb:GetItem", "resource": "arn:aws:dynamodb:us-east-1:123456789012:table/daftar-sessions", "context": { "aws:SourceIp": "203.0.113.9" }, "decision": "Deny", "reason": "no-allow" },
+    { "name": "write a log line (resource uses a wildcard in the policy)", "action": "logs:PutLogEvents", "resource": "arn:aws:logs:us-east-1:123456789012:log-group:/daftar/api:log-stream:api-1", "context": {}, "decision": "Allow", "reason": "allowed" },
+    { "name": "describe instances: allowed by the policy, but outside the boundary", "action": "ec2:DescribeInstances", "resource": "*", "context": {}, "decision": "Deny", "reason": "outside-boundary" },
+    { "name": "create a user: no policy grants it", "action": "iam:CreateUser", "resource": "arn:aws:iam::123456789012:user/x", "context": {}, "decision": "Deny", "reason": "no-allow" }
+  ]
+}

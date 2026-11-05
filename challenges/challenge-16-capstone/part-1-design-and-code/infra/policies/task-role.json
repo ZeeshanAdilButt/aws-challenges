@@ -1,0 +1,9 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Sid": "ReadWriteNotes", "Effect": "Allow", "Action": ["s3:GetObject", "s3:PutObject"], "Resource": "arn:aws:s3:::daftar-capstone-notes/notes/*" },
+    { "Sid": "ListNotesFolder", "Effect": "Allow", "Action": "s3:ListBucket", "Resource": "arn:aws:s3:::daftar-capstone-notes", "Condition": { "StringLike": { "s3:prefix": "notes/*" } } },
+    { "Sid": "SendJobs", "Effect": "Allow", "Action": "sqs:SendMessage", "Resource": "arn:aws:sqs:us-east-1:123456789012:daftar-jobs" },
+    { "Sid": "NoPlainHttp", "Effect": "Deny", "Action": "s3:*", "Resource": ["arn:aws:s3:::daftar-capstone-notes", "arn:aws:s3:::daftar-capstone-notes/*"], "Condition": { "Bool": { "aws:SecureTransport": "false" } } }
+  ]
+}

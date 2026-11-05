@@ -1,0 +1,12 @@
+{"time":"01:05","level":"DEBUG","msg":"cache lookup key=notes:owner:* hit=false","note":"first seen right after the deploy, then on every request"}
+{"time":"01:12","level":"WARN","msg":"query notes_by_owner took 4180 ms","rows":214000}
+{"time":"01:16","level":"ERROR","msg":"upstream timeout after 5000 ms","path":"/api/notes"}
+{"time":"01:18","level":"WARN","msg":"query notes_by_owner took 4180 ms","rows":214000}
+{"time":"01:20","level":"ERROR","msg":"task exited: out of memory, restarting","task":"daftar-api"}
+{"time":"01:24","level":"WARN","msg":"query notes_by_owner took 4180 ms","rows":214000}
+{"time":"01:25","level":"ERROR","msg":"upstream timeout after 5000 ms","path":"/api/notes"}
+{"time":"01:30","level":"WARN","msg":"query notes_by_owner took 4180 ms","rows":214000}
+{"time":"01:34","level":"ERROR","msg":"upstream timeout after 5000 ms","path":"/api/notes"}
+{"time":"01:36","level":"WARN","msg":"query notes_by_owner took 4180 ms","rows":214000}
+{"time":"01:42","level":"WARN","msg":"query notes_by_owner took 4180 ms","rows":214000}
+{"time":"01:43","level":"ERROR","msg":"upstream timeout after 5000 ms","path":"/api/notes"}

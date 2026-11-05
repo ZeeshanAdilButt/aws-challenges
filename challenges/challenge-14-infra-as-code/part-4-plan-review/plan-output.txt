@@ -1,0 +1,52 @@
+An illustration for a review exercise, written by hand in the usual shape of a plan. It is NOT the output of a real run.
+
+  # aws_cloudwatch_log_group.api will be created
+  + resource "aws_cloudwatch_log_group" "api" {
+      + name              = "/daftar/api"
+      + retention_in_days = 14
+    }
+
+  # aws_vpc.main will be updated in-place
+  ~ resource "aws_vpc" "main" {
+      ~ tags = {
+          + "team" = "platform"
+        }
+    }
+
+  # aws_subnet.app_c will be created
+  + resource "aws_subnet" "app_c" {
+      + cidr_block        = "10.20.12.0/22"
+      + availability_zone = "us-east-1c"
+    }
+
+  # aws_db_instance.main must be replaced
+-/+ resource "aws_db_instance" "main" {
+      ~ identifier        = "daftar-prod" -> (known after apply) # forces replacement
+      ~ allocated_storage = 100 -> 200
+        engine            = "postgres"
+    }
+
+  # aws_security_group_rule.db_from_world will be created
+  + resource "aws_security_group_rule" "db_from_world" {
+      + type        = "ingress"
+      + from_port   = 5432
+      + to_port     = 5432
+      + protocol    = "tcp"
+      + cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  # aws_iam_policy.deploy will be updated in-place
+  ~ resource "aws_iam_policy" "deploy" {
+      ~ policy = jsonencode(
+          ~ {
+              ~ Statement = [
+                  ~ {
+                      ~ Action   = "s3:GetObject" -> "*"
+                      ~ Resource = "arn:aws:s3:::daftar-notes-prod/*" -> "*"
+                    },
+                ]
+            }
+        )
+    }
+
+Plan: 4 to add, 2 to change, 1 to destroy.

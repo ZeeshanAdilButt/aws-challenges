@@ -1,0 +1,24 @@
+{
+  "changes": [
+    {
+      "time": "01:05",
+      "what": "deploy",
+      "detail": "daftar-api v142 (adds notes_by_owner listing, adds a debug log line)"
+    },
+    {
+      "time": "01:45",
+      "what": "rollback",
+      "detail": "daftar-api back to v141"
+    }
+  ],
+  "alarms": [
+    {
+      "name": "api-5xx",
+      "metric": "errors5xx",
+      "threshold": 5,
+      "m": 3,
+      "n": 3,
+      "treat": "notBreaching"
+    }
+  ]
+}
