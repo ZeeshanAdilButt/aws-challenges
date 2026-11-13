@@ -33,6 +33,9 @@
     "test:16:1": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-1-*/*.test.mjs\"",
     "test:16:2": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-2-*/*.test.mjs\"",
     "test:16:3": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-3-*/*.test.mjs\"",
+    "drive:up": "docker compose -f challenges/challenge-17-file-storage/docker-compose.yml --profile ui up -d --build",
+    "drive:down": "docker compose -f challenges/challenge-17-file-storage/docker-compose.yml --profile ui --profile web down -v",
+    "test:17": "docker compose -f challenges/challenge-17-file-storage/docker-compose.yml exec -T lab bash -c \"for p in part-*/check.py; do python $p || exit 1; done\"",
     "test:16:4": "node toolkit/with-env.mjs --test --test-concurrency=1 \"challenges/challenge-16-*/part-4-*/*.test.mjs\""
   },
   "dependencies": {

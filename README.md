@@ -81,6 +81,7 @@ moto keeps the API state (resources and their settings) but runs no instances, m
 | [14 infra-as-code](challenges/challenge-14-infra-as-code/README.md) | the VPC as OpenTofu; state in S3; a drift drill; a plan review | emulator, model |
 | [15 find-the-bill](challenges/challenge-15-find-the-bill/README.md) | two usage reports; find three causes; tags and rules | dataset |
 | [16 capstone](challenges/challenge-16-capstone/README.md) | design and code the platform; test it; break it; price it | emulator, model |
+| [17 file storage](challenges/challenge-17-file-storage/README.md) | build a shared drive from six AWS services; watch it; break it four ways | AWS Emulator, its own compose file |
 
 Challenge 11 starts a Postgres container (`postgres:17-alpine`, Compose profile `restore`) and challenge 12 uses moto instead of the DynamoDB Local image, to save a download. The OpenTofu challenges (14 and 16) are tested without starting OpenTofu; the apply is a hand step described in their READMEs.
 

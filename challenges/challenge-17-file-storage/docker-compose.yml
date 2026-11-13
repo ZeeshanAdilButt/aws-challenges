@@ -1,0 +1,69 @@
+# Challenge 17 has its own compose file, because it needs an emulator that runs function code.
+# Three services share ONE network, so "127.0.0.1" means the emulator for all of them.
+#
+#   emulator - the AWS API on https://127.0.0.1:9317 (S3, DynamoDB, SQS, Lambda, API Gateway, IAM, CloudWatch)
+#   lab      - a shell with the AWS CLI and Python. You type your commands here.
+#   web      - the Daftar Drive web page on http://127.0.0.1:8090. It stands in for the EC2 web server.
+#              It starts in part 5:  docker compose --profile web up -d web
+#   stackport - a console in the browser on http://127.0.0.1:8091, to look at what you built.
+#
+# Every port is bound to this computer only (127.0.0.1), never to the network.
+name: aws-challenges-17
+
+x-drive: &drive
+  build: ./lab
+  image: aws-challenges-17-tools
+  network_mode: "service:emulator"
+  user: "1000:1000"
+  working_dir: /drive
+  volumes:
+    - ./:/drive
+    - emulator-home:/home/emulator/.aws/emulator:ro
+
+services:
+  emulator:
+    build: ./emulator
+    image: aws-challenges-17-emulator
+    command: ["-p", "9317", "--telemetry", "off"]
+    ports:
+      - "127.0.0.1:9317:9317"
+      - "127.0.0.1:8090:8090"
+      - "127.0.0.1:8091:8091"
+    mem_limit: 3g
+    memswap_limit: 3g
+    volumes:
+      - emulator-home:/home/emulator/.aws/emulator
+
+  lab:
+    <<: *drive
+    command: ["sleep", "infinity"]
+    depends_on: [emulator]
+
+  web:
+    <<: *drive
+    command: ["python", "web/app.py"]
+    depends_on: [emulator]
+    restart: unless-stopped
+    profiles: ["web"]
+
+  # A click-around console for the emulator (the open source StackPort): http://127.0.0.1:8091
+  # Browse buckets, tables, queues and functions with the mouse. Start it with:
+  #   docker compose --profile ui up -d stackport
+  stackport:
+    image: davireis/stackport:latest
+    network_mode: "service:emulator"
+    depends_on: [emulator]
+    restart: unless-stopped
+    profiles: ["ui"]
+    environment:
+      STACKPORT_PORT: "8091"
+      AWS_ENDPOINT_URL: "https://127.0.0.1:9317"
+      AWS_REGION: "us-east-1"
+      AWS_CA_BUNDLE: "/home/emulator/.aws/emulator/9317/ca.pem"
+      AWS_SHARED_CREDENTIALS_FILE: "/home/emulator/.aws/emulator/9317/emulator_credentials"
+      AWS_CONFIG_FILE: "/home/emulator/.aws/emulator/9317/config"
+    volumes:
+      - emulator-home:/home/emulator/.aws/emulator:ro
+
+volumes:
+  emulator-home:

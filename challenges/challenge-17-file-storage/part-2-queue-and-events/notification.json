@@ -1,0 +1,12 @@
+{
+  "QueueConfigurations": [
+    {
+      "Id": "new-file-to-queue",
+      "QueueArn": "arn:aws:sqs:us-east-1:000000000000:drive-uploads",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": { "FilterRules": [{ "Name": "prefix", "Value": "files/" }] }
+      }
+    }
+  ]
+}

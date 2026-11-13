@@ -1,0 +1,11 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EverythingOnEverything",
+      "Effect": "Allow",
+      "Action": ["s3:*", "dynamodb:*", "sqs:*", "logs:*", "cloudwatch:*"],
+      "Resource": "*"
+    }
+  ]
+}

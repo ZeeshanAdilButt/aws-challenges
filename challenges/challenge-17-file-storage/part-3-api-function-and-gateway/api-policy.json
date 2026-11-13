@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "FileRecords",
+      "Effect": "Allow",
+      "Action": ["dynamodb:PutItem", "dynamodb:GetItem", "dynamodb:Scan", "dynamodb:DeleteItem"],
+      "Resource": "arn:aws:dynamodb:us-east-1:000000000000:table/drive-files"
+    },
+    {
+      "Sid": "FileBytes",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::daftar-drive-files/files/*"
+    }
+  ]
+}

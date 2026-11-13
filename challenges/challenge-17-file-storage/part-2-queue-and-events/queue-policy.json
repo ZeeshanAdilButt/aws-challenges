@@ -1,0 +1,16 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OnlyOurBucketMaySend",
+      "Effect": "Allow",
+      "Principal": { "Service": "s3.amazonaws.com" },
+      "Action": "sqs:SendMessage",
+      "Resource": "arn:aws:sqs:us-east-1:000000000000:drive-uploads",
+      "Condition": {
+        "ArnEquals": { "aws:SourceArn": "arn:aws:s3:::daftar-drive-files" },
+        "StringEquals": { "aws:SourceAccount": "000000000000" }
+      }
+    }
+  ]
+}
